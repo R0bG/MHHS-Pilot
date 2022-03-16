@@ -1,0 +1,131 @@
+---
+openapi: 3.0.0
+info:
+  title: Send Message/Event(s)
+  description: ""
+  version: "0.1"
+servers:
+- url: https://virtserver.swaggerhub.com/MHHSpilot/0.1
+  description: SwaggerHub API Auto Mocking
+paths:
+  /MultipleEvents:
+    get:
+      tags:
+      - Get Event/Messages
+      summary: Get a series of events/messages
+      description: Allows a Market Participant to get a series of events/messages
+      operationId: getMessages
+      responses:
+        "200":
+          description: List of Events
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventListType'
+    post:
+      tags:
+      - Submit Event/Messages
+      summary: Submit a series of events/messages
+      description: Allows a Market Participant to submit a series of events/messages
+      operationId: submitMessages
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventListType'
+        required: true
+      responses:
+        "201":
+          description: Created
+components:
+  schemas:
+    EventListType:
+      minItems: 1
+      type: array
+      description: Array of incoming events
+      items:
+        $ref: '#/components/schemas/Events'
+    Events:
+      type: object
+      properties:
+        header:
+          $ref: '#/components/schemas/EventHeaderType'
+        body:
+          $ref: '#/components/schemas/EventBodyType'
+      description: a MHHS incoming event
+    EventHeaderType:
+      type: object
+      properties:
+        interfaceId:
+          type: string
+          example: MHHS-IF-005
+        sentTimestamp:
+          type: string
+          example: 2022-03-01T13:00:00Z
+        sender:
+          type: string
+        senderRole:
+          type: string
+        senderUniqueRef:
+          type: string
+        recipient:
+          type: string
+        secondaryRecipient:
+          type: string
+        transactionId:
+          type: string
+          readOnly: true
+        transactionTimestamp:
+          type: string
+          readOnly: true
+        environment:
+          type: string
+          readOnly: true
+        replayIndicator:
+          type: boolean
+          readOnly: true
+        workflowCorrelationId:
+          type: string
+          readOnly: true
+      description: Standard Header
+    EventBodyType:
+      type: object
+      properties:
+        Body:
+          oneOf:
+          - $ref: '#/components/schemas/IF005_MeteringServiceUpdateType'
+          - $ref: '#/components/schemas/IF006_RegistrationNotificationOfMTDUpdateType'
+    IF005_MeteringServiceUpdateType:
+      type: object
+      properties:
+        meterEventCode:
+          type: string
+          format: int64
+          example: DEV001
+        MPANCore:
+          type: string
+          format: string
+        supplierId:
+          type: string
+          format: string
+        meteringServiceId:
+          type: string
+          format: string
+    IF006_RegistrationNotificationOfMTDUpdateType:
+      type: object
+      properties:
+        eventResponseCode:
+          $ref: '#/components/schemas/DI-998-EventCode'
+        errorMessage:
+          $ref: '#/components/schemas/DI-997-MPANCore'
+    DI-998-EventCode:
+      maximum: 1
+      minimum: 1
+      type: string
+      description: Event Response Code
+      example: C
+    DI-997-MPANCore:
+      maximum: 10
+      minimum: 10
+      type: string
+      example: 20 0001 5001 165
